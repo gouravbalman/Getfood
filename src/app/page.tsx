@@ -22,15 +22,17 @@ export default function Home() {
   const fetchSuggestion = useCallback(() => {
     setError(null);
     startTransition(async () => {
+      // Reset suggestion state before fetching new one to ensure loading state shows correctly
+      if (!initialLoad) {
+          setSuggestion(null);
+      }
       const result = await getDishSuggestionAction({ previousDishNames: previousSuggestions });
       if ('error' in result) {
         setError(result.error);
         setSuggestion(null);
       } else {
-        // Keyword handling/fallback is now primarily in the flow/component
         setSuggestion(result);
         // Add the new suggestion only if it's different from the last one
-        // This check might be redundant if the AI flow is robustly avoiding repeats
         setPreviousSuggestions(prev => prev.includes(result.dishName) ? prev : [...prev, result.dishName]);
       }
       if (initialLoad) {
@@ -49,7 +51,7 @@ export default function Home() {
 
   return (
     // Enhanced gradient using theme variables, adjust stops and direction
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-12 bg-gradient-to-b from-background via-secondary/10 to-background dark:from-background dark:via-secondary/20 dark:to-background">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-12 bg-gradient-to-b from-background via-secondary/10 to-background dark:from-background dark:via-primary/10 dark:to-background">
        {/* Increased spacing and refined text styles */}
        <div className="text-center mb-10 space-y-3">
           <ChefHat className="mx-auto h-20 w-20 text-primary animate-bounce drop-shadow-lg" />
@@ -70,10 +72,22 @@ export default function Home() {
                <Skeleton className="h-7 w-3/5 mx-auto bg-muted rounded-md" />
                <Skeleton className="h-4 w-4/5 mx-auto mt-2 bg-muted/70 rounded-md" />
              </CardHeader>
-             {/* Image Skeleton */}
-             <Skeleton className="w-full h-60 md:h-80 bg-muted/60" />
+             {/* REMOVED Image Skeleton */}
+             {/* Separator is now the first element after header during loading */}
              <Separator className="my-4 md:my-6 bg-border/40" />
              <CardContent className="space-y-6 px-4 md:px-6 pb-6">
+               {/* Nutrition Skeleton */}
+               <div>
+                 <Skeleton className="h-6 w-1/3 mb-4 bg-muted rounded-md" />
+                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                   <Skeleton className="h-16 w-full bg-muted/70 rounded-lg" />
+                   <Skeleton className="h-16 w-full bg-muted/70 rounded-lg" />
+                   <Skeleton className="h-16 w-full bg-muted/70 rounded-lg" />
+                   <Skeleton className="h-16 w-full bg-muted/70 rounded-lg sm:col-span-1" />
+                   <Skeleton className="h-16 w-full bg-muted/70 rounded-lg sm:col-span-1" />
+                 </div>
+               </div>
+                <Separator className="bg-border/40"/>
                {/* Ingredients Skeleton */}
                <div>
                  <Skeleton className="h-6 w-1/4 mb-4 bg-muted rounded-md" />
