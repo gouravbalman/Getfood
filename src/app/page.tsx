@@ -8,7 +8,7 @@ import { DishCard } from "@/components/dish-card";
 import { Loader2, ChefHat, RefreshCw, TriangleAlert } from 'lucide-react'; // Added TriangleAlert
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/card'; // Added Card imports
 import { Separator } from "@/components/ui/separator";
 import { getCurrentTimeOfDay } from '@/lib/time-helper';
 
@@ -27,24 +27,23 @@ export default function Home() {
         setError(result.error);
         setSuggestion(null);
       } else {
-        if (!result.imageSearchKeywords || result.imageSearchKeywords.trim() === '') {
-            console.warn("Received invalid image search keywords from action. Using fallback.");
-            result.imageSearchKeywords = `${result.dishName} North Indian food vegetarian`; // Improved fallback
-        }
+        // Keyword handling/fallback is now primarily in the flow/component
         setSuggestion(result);
-        setPreviousSuggestions(prev => [...prev, result.dishName]);
+        // Add the new suggestion only if it's different from the last one
+        // This check might be redundant if the AI flow is robustly avoiding repeats
+        setPreviousSuggestions(prev => prev.includes(result.dishName) ? prev : [...prev, result.dishName]);
       }
       if (initialLoad) {
         setInitialLoad(false);
       }
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [previousSuggestions, initialLoad]);
+  }, [previousSuggestions, initialLoad]); // Keep dependencies minimal
 
   useEffect(() => {
     fetchSuggestion();
      // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // Fetch only on initial mount
 
   const timeOfDay = getCurrentTimeOfDay();
 

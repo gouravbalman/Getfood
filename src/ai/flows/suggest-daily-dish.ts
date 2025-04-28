@@ -78,7 +78,7 @@ const suggestDailyDishFlow = ai.defineFlow<
 
     // Basic validation for keywords - ensure it's not empty and provide a fallback
     if (!output.imageSearchKeywords || output.imageSearchKeywords.trim() === '') {
-        console.warn("Received empty image search keywords. Using fallback.");
+        console.warn("Received empty image search keywords from AI. Using fallback.");
         // Use a more descriptive fallback
         output.imageSearchKeywords = `${output.dishName} North Indian food vegetarian`;
     }

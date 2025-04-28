@@ -23,11 +23,7 @@ export async function getDishSuggestionAction(
         previousDishNames: input?.previousDishNames ?? [],
     };
     const suggestion = await suggestDailyDish(flowInput);
-    // Basic validation for keywords - ensure it's not empty
-    if (!suggestion.imageSearchKeywords || suggestion.imageSearchKeywords.trim() === '') {
-        console.warn("Received empty image search keywords. Using fallback.");
-        suggestion.imageSearchKeywords = suggestion.dishName + " food"; // Fallback keywords
-    }
+    // Keyword validation/fallback is now handled within the flow and component.
     return suggestion;
   } catch (error) {
     console.error("Error fetching dish suggestion:", error);
