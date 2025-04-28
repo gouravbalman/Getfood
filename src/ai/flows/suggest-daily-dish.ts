@@ -14,6 +14,7 @@ const SuggestDailyDishInputSchema = z.object({
   timeOfDay: z
     .string()
     .describe("The current time of day (e.g., 'Breakfast', 'Lunch', 'Dinner')."),
+  previousDishNames: z.array(z.string()).optional().describe('A list of dish names that have already been suggested in this session and should be avoided.'),
 });
 export type SuggestDailyDishInput = z.infer<typeof SuggestDailyDishInputSchema>;
 
@@ -21,7 +22,6 @@ const SuggestDailyDishOutputSchema = z.object({
   dishName: z.string().describe('The name of the suggested North Indian dish.'),
   recipe: z.string().describe('The recipe for the suggested dish.'),
   ingredients: z.array(z.string()).describe('A list of ingredients required for the dish.'),
-  // Removed .url() validation as it's not supported by the model's schema enforcement
   imageUrl: z.string().describe('A placeholder image URL for the dish (e.g., using picsum.photos). Use format https://picsum.photos/600/400.'),
 });
 export type SuggestDailyDishOutput = z.infer<typeof SuggestDailyDishOutputSchema>;
@@ -38,7 +38,7 @@ const suggestDishPrompt = ai.definePrompt({
   output: {
     schema: SuggestDailyDishOutputSchema, // Expect the full output directly from the prompt
   },
-  // Ensure prompt clearly asks for vegetarian dish
+  // Ensure prompt clearly asks for vegetarian dish and avoids previous suggestions
   prompt: `Suggest a healthy **vegetarian** North Indian dish suitable for {{timeOfDay}}.
 Provide the following details:
 1. dishName: The name of the suggested dish.
@@ -46,7 +46,16 @@ Provide the following details:
 3. ingredients: A list of required ingredients.
 4. imageUrl: A relevant placeholder image URL for the dish using the format 'https://picsum.photos/600/400'.
 
-Focus on healthy options. Ensure the suggested dish is strictly vegetarian (no meat, poultry, or fish).`,
+Focus on healthy options. Ensure the suggested dish is strictly vegetarian (no meat, poultry, or fish).
+
+{{#if previousDishNames}}
+**Important:** Do not suggest any of the following dishes that have already been suggested:
+{{#each previousDishNames}}
+- {{this}}
+{{/each}}
+Suggest something different.
+{{/if}}
+`,
 });
 
 const suggestDailyDishFlow = ai.defineFlow<

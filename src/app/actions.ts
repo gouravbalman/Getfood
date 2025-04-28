@@ -1,16 +1,27 @@
 'use server';
 
-import { suggestDailyDish, type SuggestDailyDishOutput } from '@/ai/flows/suggest-daily-dish';
+import { suggestDailyDish, type SuggestDailyDishInput, type SuggestDailyDishOutput } from '@/ai/flows/suggest-daily-dish';
 import { getCurrentTimeOfDay } from '@/lib/time-helper';
+
+interface GetDishSuggestionActionInput {
+    previousDishNames?: string[];
+}
 
 /**
  * Server action to get a dish suggestion.
- * It determines the time of day and calls the AI flow.
+ * It determines the time of day and calls the AI flow, avoiding previously suggested dishes.
+ * @param input Optional object containing previousDishNames array.
  */
-export async function getDishSuggestionAction(): Promise<SuggestDailyDishOutput | { error: string }> {
+export async function getDishSuggestionAction(
+    input?: GetDishSuggestionActionInput
+): Promise<SuggestDailyDishOutput | { error: string }> {
   try {
     const timeOfDay = getCurrentTimeOfDay();
-    const suggestion = await suggestDailyDish({ timeOfDay });
+    const flowInput: SuggestDailyDishInput = {
+        timeOfDay,
+        previousDishNames: input?.previousDishNames ?? [],
+    };
+    const suggestion = await suggestDailyDish(flowInput);
     return suggestion;
   } catch (error) {
     console.error("Error fetching dish suggestion:", error);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useCallback } from 'react';
 import type { SuggestDailyDishOutput } from '@/ai/flows/suggest-daily-dish';
 import { getDishSuggestionAction } from './actions';
 import { Button } from "@/components/ui/button";
@@ -8,20 +8,22 @@ import { DishCard } from "@/components/dish-card";
 import { Loader2, ChefHat, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardHeader, CardContent } from '@/components/ui/card'; // Corrected import path
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Separator } from "@/components/ui/separator";
 import { getCurrentTimeOfDay } from '@/lib/time-helper';
 
 export default function Home() {
   const [suggestion, setSuggestion] = useState<SuggestDailyDishOutput | null>(null);
+  const [previousSuggestions, setPreviousSuggestions] = useState<string[]>([]); // Store previous dish names
   const [error, setError] = useState<string | null>(null);
   const [isFetching, startTransition] = useTransition();
   const [initialLoad, setInitialLoad] = useState(true); // Track initial load
 
-  const fetchSuggestion = () => {
+  const fetchSuggestion = useCallback(() => {
     setError(null); // Clear previous errors
     startTransition(async () => {
-      const result = await getDishSuggestionAction();
+      // Pass the list of previous suggestions to the action
+      const result = await getDishSuggestionAction({ previousDishNames: previousSuggestions });
       if ('error' in result) {
         setError(result.error);
         setSuggestion(null);
@@ -32,10 +34,14 @@ export default function Home() {
                 new URL(result.imageUrl); // Check if it's a valid URL
             }
              setSuggestion(result);
+             // Add the new suggestion to the list of previous ones
+             setPreviousSuggestions(prev => [...prev, result.dishName]);
         } catch (_) {
             // Handle invalid URL, maybe set a default or log error
             console.warn("Received invalid image URL:", result.imageUrl);
-            setSuggestion({ ...result, imageUrl: 'https://picsum.photos/600/400' }); // Fallback image
+            const fallbackSuggestion = { ...result, imageUrl: 'https://picsum.photos/600/400' };
+            setSuggestion(fallbackSuggestion); // Fallback image
+            setPreviousSuggestions(prev => [...prev, fallbackSuggestion.dishName]);
         }
 
       }
@@ -43,13 +49,14 @@ export default function Home() {
         setInitialLoad(false); // Mark initial load complete
       }
     });
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previousSuggestions, initialLoad]); // Include previousSuggestions in dependencies
 
   // Fetch initial suggestion on component mount
   useEffect(() => {
     fetchSuggestion();
      // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, []); // fetchSuggestion is now memoized with useCallback, so this runs once effectively
 
   const timeOfDay = getCurrentTimeOfDay();
 
