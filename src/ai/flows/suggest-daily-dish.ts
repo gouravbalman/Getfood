@@ -21,6 +21,7 @@ const SuggestDailyDishOutputSchema = z.object({
   dishName: z.string().describe('The name of the suggested North Indian dish.'),
   recipe: z.string().describe('The recipe for the suggested dish.'),
   ingredients: z.array(z.string()).describe('A list of ingredients required for the dish.'),
+  imageUrl: z.string().url().describe('A placeholder image URL for the dish (e.g., using picsum.photos). Use format https://picsum.photos/600/400.'), // Added imageUrl
 });
 export type SuggestDailyDishOutput = z.infer<typeof SuggestDailyDishOutputSchema>;
 
@@ -41,6 +42,7 @@ Provide the following details:
 1. dishName: The name of the dish.
 2. recipe: A clear and concise recipe for the dish.
 3. ingredients: A list of required ingredients.
+4. imageUrl: A relevant placeholder image URL for the dish using the format 'https://picsum.photos/600/400'.
 
 Focus on healthy options. Ensure the suggested dish is strictly vegetarian (no meat, poultry, or fish).`,
 });

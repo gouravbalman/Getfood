@@ -6,8 +6,9 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Light Theme definition moved to .light */
 @layer base {
-  :root {
+  .light {
     --background: 36 25% 95%; /* Light Beige/Brown */
     --foreground: 20 14.3% 4.1%; /* Dark Brown */
     --card: 36 25% 90%; /* Slightly darker beige */
@@ -42,26 +43,28 @@ body {
     --sidebar-border: 36 20% 80%;
     --sidebar-ring: 36 100% 60%;
   }
-  .dark {
+
+  /* Dark theme set as default :root */
+ :root {
     --background: 20 14.3% 4.1%; /* Dark Brown */
     --foreground: 0 0% 95%; /* Light Gray/Off-white */
     --card: 24 9.8% 10%; /* Darker Brown */
     --card-foreground: 0 0% 95%;
     --popover: 20 14.3% 4.1%;
     --popover-foreground: 0 0% 95%;
-    --primary: 36 100% 60%; /* Saffron */
+    --primary: 36 100% 55%; /* Slightly desaturated Saffron for dark mode */
     --primary-foreground: 0 0% 98%; /* White/Very Light */
-    --secondary: 120 25% 20%; /* Dark Muted Green */
+    --secondary: 120 25% 15%; /* Darker Muted Green */
     --secondary-foreground: 120 40% 85%; /* Muted Light Green */
-    --muted: 24 9.8% 10%; /* Darker Brown */
+    --muted: 24 9.8% 15%; /* Slightly lighter muted dark */
     --muted-foreground: 0 0% 63.9%; /* Lighter Gray */
     --accent: 120 25% 20%; /* Dark Muted Green */
     --accent-foreground: 120 40% 85%; /* Muted Light Green */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 24 5.4% 16.1%; /* Dark Border */
+    --border: 24 5.4% 20.1%; /* Slightly lighter dark Border */
     --input: 24 5.4% 16.1%; /* Dark Input */
-    --ring: 36 100% 60%; /* Saffron Ring */
+    --ring: 36 100% 55%; /* Saffron Ring (desaturated) */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -69,12 +72,13 @@ body {
     --chart-5: 340 75% 55%;
     --sidebar-background: 24 9.8% 10%; /* Darker Brown for Sidebar */
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 36 100% 60%; /* Saffron */
+    --sidebar-primary: 36 100% 55%; /* Saffron (desaturated) */
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 120 25% 15%; /* Very Dark Muted Green for Sidebar Accent */
     --sidebar-accent-foreground: 120 40% 85%;
     --sidebar-border: 24 5.4% 16.1%;
-    --sidebar-ring: 36 100% 60%;
+    --sidebar-ring: 36 100% 55%;
+    --radius: 0.5rem;
   }
 }
 
