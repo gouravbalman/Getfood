@@ -28,45 +28,23 @@ export async function suggestDailyDish(input: SuggestDailyDishInput): Promise<Su
   return suggestDailyDishFlow(input);
 }
 
-const generateRecipe = ai.defineTool({
-  name: 'generateRecipe',
-  description: 'Generates a recipe for a given North Indian dish and lists its ingredients.',
-  inputSchema: z.object({
-    dishName: z.string().describe('The name of the North Indian dish to generate a recipe for.'),
-    timeOfDay: z
-    .string()
-    .describe("The current time of day (e.g., 'Breakfast', 'Lunch', 'Dinner')."),
-  }),
-  outputSchema: z.object({
-    recipe: z.string().describe('The recipe for the suggested dish.'),
-    ingredients: z.array(z.string()).describe('A list of ingredients required for the dish.'),
-  }),
-  async fn(input) {
-    // In a real application, this could call an external recipe API or database.
-    // For now, it returns a placeholder object.
-    return {
-      recipe: `A delicious recipe for ${input.dishName} goes here.`, // Placeholder recipe
-      ingredients: ['Ingredient 1', 'Ingredient 2', 'Ingredient 3'], // Placeholder ingredients
-    };
-  },
-});
+// Removed the generateRecipe tool as it's not needed; the LLM can generate everything in one go.
 
 const suggestDishPrompt = ai.definePrompt({
   name: 'suggestDishPrompt',
   input: {
-    schema: z.object({
-      timeOfDay: z
-        .string()
-        .describe("The current time of day (e.g., 'Breakfast', 'Lunch', 'Dinner')."),
-    }),
+    schema: SuggestDailyDishInputSchema, // Use the flow's input schema
   },
   output: {
-    schema: z.object({
-      dishName: z.string().describe('The name of the suggested North Indian dish.'),
-    }),
+    schema: SuggestDailyDishOutputSchema, // Expect the full output directly from the prompt
   },
-  prompt: `Suggest a healthy North Indian dish suitable for {{timeOfDay}}. Give only name.`, // Just output the name of the dish
-  tools: [generateRecipe],
+  prompt: `Suggest a healthy North Indian dish suitable for {{timeOfDay}}.
+Provide the following details:
+1. dishName: The name of the dish.
+2. recipe: A clear and concise recipe for the dish.
+3. ingredients: A list of required ingredients.
+
+Focus on healthy options.`,
 });
 
 const suggestDailyDishFlow = ai.defineFlow<
@@ -79,17 +57,14 @@ const suggestDailyDishFlow = ai.defineFlow<
     outputSchema: SuggestDailyDishOutputSchema,
   },
   async input => {
-    const { output: dishNameOutput } = await suggestDishPrompt(input);
-    const { dishName } = dishNameOutput!;
-    const { recipe, ingredients } = await generateRecipe({
-      dishName: dishName!,
-      timeOfDay: input.timeOfDay
-    });
+    // Directly call the prompt that generates the full output
+    const { output } = await suggestDishPrompt(input);
 
-    return {
-      dishName: dishName!,
-      recipe,
-      ingredients,
-    };
+    if (!output) {
+        throw new Error("Failed to generate dish suggestion.");
+    }
+
+    // The output from the prompt already matches the required SuggestDailyDishOutputSchema
+    return output;
   }
 );
