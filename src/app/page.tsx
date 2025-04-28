@@ -8,8 +8,9 @@ import { DishCard } from "@/components/dish-card";
 import { Loader2, ChefHat, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardHeader, CardContent } from "@/components/ui/card"; // Import Card components
-import { Separator } from "@/components/ui/separator"; // Import Separator
+// Changed import path from alias to relative to fix potential resolution issue
+import { Card, CardHeader, CardContent } from '../components/ui/card';
+import { Separator } from "@/components/ui/separator";
 import { getCurrentTimeOfDay } from '@/lib/time-helper';
 
 export default function Home() {
