@@ -28,8 +28,6 @@ export async function suggestDailyDish(input: SuggestDailyDishInput): Promise<Su
   return suggestDailyDishFlow(input);
 }
 
-// Removed the generateRecipe tool as it's not needed; the LLM can generate everything in one go.
-
 const suggestDishPrompt = ai.definePrompt({
   name: 'suggestDishPrompt',
   input: {
@@ -38,13 +36,13 @@ const suggestDishPrompt = ai.definePrompt({
   output: {
     schema: SuggestDailyDishOutputSchema, // Expect the full output directly from the prompt
   },
-  prompt: `Suggest a healthy North Indian dish suitable for {{timeOfDay}}.
+  prompt: `Suggest a healthy **vegetarian** North Indian dish suitable for {{timeOfDay}}.
 Provide the following details:
 1. dishName: The name of the dish.
 2. recipe: A clear and concise recipe for the dish.
 3. ingredients: A list of required ingredients.
 
-Focus on healthy options.`,
+Focus on healthy options. Ensure the suggested dish is strictly vegetarian (no meat, poultry, or fish).`,
 });
 
 const suggestDailyDishFlow = ai.defineFlow<
