@@ -8,7 +8,7 @@ import { DishCard } from "@/components/dish-card";
 import { Loader2, ChefHat, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/card'; // Keep Card imports
 import { Separator } from "@/components/ui/separator";
 import { getCurrentTimeOfDay } from '@/lib/time-helper';
 
@@ -28,22 +28,14 @@ export default function Home() {
         setError(result.error);
         setSuggestion(null);
       } else {
-        // Validate image URL (optional but good practice)
-        try {
-            if (result.imageUrl) {
-                new URL(result.imageUrl); // Check if it's a valid URL
-            }
-             setSuggestion(result);
-             // Add the new suggestion to the list of previous ones
-             setPreviousSuggestions(prev => [...prev, result.dishName]);
-        } catch (_) {
-            // Handle invalid URL, maybe set a default or log error
-            console.warn("Received invalid image URL:", result.imageUrl);
-            const fallbackSuggestion = { ...result, imageUrl: 'https://picsum.photos/600/400' };
-            setSuggestion(fallbackSuggestion); // Fallback image
-            setPreviousSuggestions(prev => [...prev, fallbackSuggestion.dishName]);
+        // Basic validation for keywords received from action
+        if (!result.imageSearchKeywords || result.imageSearchKeywords.trim() === '') {
+            console.warn("Received invalid image search keywords from action. Using fallback.");
+            result.imageSearchKeywords = result.dishName + " food"; // Fallback
         }
-
+        setSuggestion(result);
+        // Add the new suggestion to the list of previous ones
+        setPreviousSuggestions(prev => [...prev, result.dishName]);
       }
       if (initialLoad) {
         setInitialLoad(false); // Mark initial load complete
@@ -76,6 +68,7 @@ export default function Home() {
       <div className="w-full max-w-2xl flex flex-col items-center space-y-6">
         {/* Loading State */}
         {(isFetching || initialLoad) && !error && (
+          // Use Card component here for the skeleton structure
           <Card className="w-full max-w-2xl mx-auto shadow-lg bg-card/80 backdrop-blur-sm border-border/50 overflow-hidden">
             <CardHeader className="text-center pb-4">
               <Skeleton className="h-8 w-3/5 mx-auto bg-muted" />

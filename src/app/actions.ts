@@ -11,6 +11,7 @@ interface GetDishSuggestionActionInput {
  * Server action to get a dish suggestion.
  * It determines the time of day and calls the AI flow, avoiding previously suggested dishes.
  * @param input Optional object containing previousDishNames array.
+ * @returns A promise resolving to the dish suggestion output or an error object.
  */
 export async function getDishSuggestionAction(
     input?: GetDishSuggestionActionInput
@@ -22,6 +23,11 @@ export async function getDishSuggestionAction(
         previousDishNames: input?.previousDishNames ?? [],
     };
     const suggestion = await suggestDailyDish(flowInput);
+    // Basic validation for keywords - ensure it's not empty
+    if (!suggestion.imageSearchKeywords || suggestion.imageSearchKeywords.trim() === '') {
+        console.warn("Received empty image search keywords. Using fallback.");
+        suggestion.imageSearchKeywords = suggestion.dishName + " food"; // Fallback keywords
+    }
     return suggestion;
   } catch (error) {
     console.error("Error fetching dish suggestion:", error);
