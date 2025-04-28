@@ -20,10 +20,10 @@ export type SuggestDailyDishInput = z.infer<typeof SuggestDailyDishInputSchema>;
 
 const SuggestDailyDishOutputSchema = z.object({
   dishName: z.string().describe('The name of the suggested North Indian dish.'),
-  recipe: z.string().describe('The recipe for the suggested dish, formatted with numbered steps (e.g., "1. Step one.\n2. Step two."). Each step should be on a new line.'),
+  recipe: z.string().describe('The recipe for the suggested dish, formatted with numbered steps (e.g., "1. Step one.\\n2. Step two."). Each step should be on a new line.'),
   ingredients: z.array(z.string()).describe('A list of ingredients required for the dish.'),
-  // Changed from imageUrl to imageSearchKeywords
-  imageSearchKeywords: z.string().describe('3-4 keywords (e.g., "dish name cuisine type", like "Palak Paneer Indian food") suitable for searching an image related to the dish.'),
+  // Refined description for better image search keywords
+  imageSearchKeywords: z.string().describe('4-5 highly relevant keywords suitable for searching a high-quality image of the dish (e.g., "dish name cuisine type food photography close up", like "Palak Paneer North Indian food photography close up").'),
 });
 export type SuggestDailyDishOutput = z.infer<typeof SuggestDailyDishOutputSchema>;
 
@@ -39,13 +39,13 @@ const suggestDishPrompt = ai.definePrompt({
   output: {
     schema: SuggestDailyDishOutputSchema, // Expect the full output directly from the prompt
   },
-  // Ensure prompt clearly asks for vegetarian dish, numbered steps, and avoids previous suggestions
+  // Ensure prompt clearly asks for vegetarian dish, numbered steps, avoids previous suggestions, and asks for specific keywords
   prompt: `Suggest a healthy **vegetarian** North Indian dish suitable for {{timeOfDay}}.
 Provide the following details:
 1. dishName: The name of the suggested dish.
-2. recipe: A clear and concise recipe for the dish. **Format the steps numerically (e.g., "1. Chop onions.\n2. Sauté onions.") with each step on a new line.**
+2. recipe: A clear and concise recipe for the dish. **Format the steps numerically (e.g., "1. Chop onions.\\n2. Sauté onions.") with each step on a new line.**
 3. ingredients: A list of required ingredients.
-4. imageSearchKeywords: 3-4 keywords (e.g., "dish name cuisine type", like "Aloo Gobi North Indian") suitable for searching an image related to the dish.
+4. imageSearchKeywords: 4-5 highly relevant keywords (e.g., "dish name cuisine type food photography close up", like "Aloo Gobi North Indian food photography close up") suitable for searching a high-quality image of the dish. Ensure keywords are specific to the dish.
 
 Focus on healthy options. Ensure the suggested dish is strictly vegetarian (no meat, poultry, or fish).
 
@@ -74,6 +74,13 @@ const suggestDailyDishFlow = ai.defineFlow<
 
     if (!output) {
         throw new Error("Failed to generate dish suggestion.");
+    }
+
+    // Basic validation for keywords - ensure it's not empty and provide a fallback
+    if (!output.imageSearchKeywords || output.imageSearchKeywords.trim() === '') {
+        console.warn("Received empty image search keywords. Using fallback.");
+        // Use a more descriptive fallback
+        output.imageSearchKeywords = `${output.dishName} North Indian food vegetarian`;
     }
 
     // The output from the prompt should match the required SuggestDailyDishOutputSchema
