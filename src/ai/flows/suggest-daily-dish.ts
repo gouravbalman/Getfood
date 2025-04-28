@@ -21,7 +21,8 @@ const SuggestDailyDishOutputSchema = z.object({
   dishName: z.string().describe('The name of the suggested North Indian dish.'),
   recipe: z.string().describe('The recipe for the suggested dish.'),
   ingredients: z.array(z.string()).describe('A list of ingredients required for the dish.'),
-  imageUrl: z.string().url().describe('A placeholder image URL for the dish (e.g., using picsum.photos). Use format https://picsum.photos/600/400.'), // Added imageUrl
+  // Removed .url() validation as it's not supported by the model's schema enforcement
+  imageUrl: z.string().describe('A placeholder image URL for the dish (e.g., using picsum.photos). Use format https://picsum.photos/600/400.'),
 });
 export type SuggestDailyDishOutput = z.infer<typeof SuggestDailyDishOutputSchema>;
 
@@ -37,9 +38,10 @@ const suggestDishPrompt = ai.definePrompt({
   output: {
     schema: SuggestDailyDishOutputSchema, // Expect the full output directly from the prompt
   },
+  // Ensure prompt clearly asks for vegetarian dish
   prompt: `Suggest a healthy **vegetarian** North Indian dish suitable for {{timeOfDay}}.
 Provide the following details:
-1. dishName: The name of the dish.
+1. dishName: The name of the suggested dish.
 2. recipe: A clear and concise recipe for the dish.
 3. ingredients: A list of required ingredients.
 4. imageUrl: A relevant placeholder image URL for the dish using the format 'https://picsum.photos/600/400'.
@@ -64,7 +66,7 @@ const suggestDailyDishFlow = ai.defineFlow<
         throw new Error("Failed to generate dish suggestion.");
     }
 
-    // The output from the prompt already matches the required SuggestDailyDishOutputSchema
+    // The output from the prompt should match the required SuggestDailyDishOutputSchema
     return output;
   }
 );
